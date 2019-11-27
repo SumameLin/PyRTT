@@ -1,27 +1,22 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-'''
+"""
 Created on 2017年12月28日
 @author: Irony."[讽刺]
 @site: https://pyqt5.com , https://github.com/892768447
 @email: 892768447@qq.com
 @file: charts.line.LineStack
 @description: like http://echarts.baidu.com/demo.html#line-stack
-'''
-
+"""
+import re
 import sys
 
-from PyQt5.QtChart import QChartView, QChart, QLineSeries, QLegend, \
-    QCategoryAxis
-from PyQt5.QtCore import Qt, QPointF, QRectF, QPoint
+from PyQt5.QtChart import QChart, QChartView, QLegend, QLineSeries, QSplineSeries, QValueAxis
+from PyQt5.QtCore import QPoint, QPointF, QRectF, Qt, pyqtSignal
 from PyQt5.QtGui import QPainter, QPen
 from PyQt5.QtWidgets import QApplication, QGraphicsLineItem, QWidget, \
     QHBoxLayout, QLabel, QVBoxLayout, QGraphicsProxyWidget
-
-__Author__ = "By: Irony.\"[讽刺]\nQQ: 892768447\nEmail: 892768447@qq.com"
-__Copyright__ = "Copyright (c) 2017 Irony.\"[讽刺]"
-__Version__ = "Version 1.0"
 
 
 class ToolTipItem(QWidget):
@@ -44,7 +39,6 @@ class ToolTipItem(QWidget):
 
 
 class ToolTipWidget(QWidget):
-
     Cache = {}
 
     def __init__(self, *args, **kwargs):
@@ -99,8 +93,6 @@ class ChartView(QChartView):
         super(ChartView, self).__init__(*args, **kwargs)
         # self.resize(800, 600)
         self.setRenderHint(QPainter.Antialiasing)  # 抗锯齿
-        # 自定义x轴label
-        self.category = ["周一", "周二", "周三", "周四", "周五", "周六", "周日"]
         self.initChart()
 
         # 提示widget
@@ -120,6 +112,12 @@ class ChartView(QChartView):
         self.min_x, self.max_x = axisX.min(), axisX.max()
         self.min_y, self.max_y = axisY.min(), axisY.max()
 
+        self.axisX_data = 0
+        self.axisY_data = 0
+        self.data_max = float("-inf")
+        self.data_min = float("inf")
+        self.data_save = []  # 很蠢的方法，待会优化
+
     def resizeEvent(self, event):
         super(ChartView, self).resizeEvent(event)
         # 当窗口大小改变时需要重新计算
@@ -130,7 +128,7 @@ class ChartView(QChartView):
         self.point_bottom = self._chart.mapToPosition(
             QPointF(self.min_x, self.min_y))
         self.step_x = (self.max_x - self.min_x) / \
-            (self._chart.axisX().tickCount() - 1)
+                      (self._chart.axisX().tickCount() - 1)
 
     def mouseMoveEvent(self, event):
         super(ChartView, self).mouseMoveEvent(event)
@@ -150,18 +148,15 @@ class ChartView(QChartView):
             self.lineItem.setLine(pos_x.x(), self.point_top.y(),
                                   pos_x.x(), self.point_bottom.y())
             self.lineItem.show()
-            try:
-                title = self.category[index]
-            except:
-                title = ""
+            title = ""
             t_width = self.toolTipWidget.width()
             t_height = self.toolTipWidget.height()
             # 如果鼠标位置离右侧的距离小于tip宽度
             x = pos.x() - t_width if self.width() - \
-                pos.x() - 20 < t_width else pos.x()
+                                     pos.x() - 20 < t_width else pos.x()
             # 如果鼠标位置离底部的高度小于tip高度
             y = pos.y() - t_height if self.height() - \
-                pos.y() - 20 < t_height else pos.y()
+                                      pos.y() - 20 < t_height else pos.y()
             self.toolTipWidget.show(
                 title, points, QPoint(x, y))
         else:
@@ -173,7 +168,7 @@ class ChartView(QChartView):
         if not marker:
             return
         visible = not marker.series().isVisible()
-#         # 隐藏或显示series
+        #         # 隐藏或显示series
         marker.series().setVisible(visible)
         marker.setVisible(True)  # 要保证marker一直显示
         # 透明度
@@ -221,43 +216,29 @@ class ChartView(QChartView):
         series.setPen(pen)
 
     def initChart(self):
-        self._chart = QChart(title="折线图堆叠")
+        self._chart = QChart()  # QChart(title="折线图堆叠")
         self._chart.setAcceptHoverEvents(True)
         # Series动画
         self._chart.setAnimationOptions(QChart.SeriesAnimations)
-        dataTable = [
-            ["邮件营销", [120, 132, 101, 134, 90, 230, 210]],
-            ["联盟广告", [220, 182, 191, 234, 290, 330, 310]],
-            ["视频广告", [150, 232, 201, 154, 190, 330, 410]],
-            ["直接访问", [320, 332, 301, 334, 390, 330, 320]],
-            ["搜索引擎", [820, 932, 901, 934, 1290, 1330, 1320]]
-        ]
-        for series_name, data_list in dataTable:
-            series = QLineSeries(self._chart)
-            for j, v in enumerate(data_list):
-                series.append(j, v)
+        # dataTable = ["CH1", "CH2", "CH3", "CH4", "CH5"]  # 暂时不会五个
+        dataTable = ["CH1"]
+        for series_name in dataTable:
+            series = QLineSeries(self._chart)  # QLineSeries QSplineSeries
+            # for j, v in enumerate(data_list):#enumerate() 函数用于将一个可遍历的数据对象(如列表、元组或字符串)组合为一个索引序列，同时列出数据和数据下标
+            #     series.append(j, v)
             series.setName(series_name)
-            series.setPointsVisible(True)  # 显示圆点
+            # series.setPointsVisible(True)  # 显示圆点
             series.hovered.connect(self.handleSeriesHoverd)  # 鼠标悬停
             self._chart.addSeries(series)
         self._chart.createDefaultAxes()  # 创建默认的轴
+        # self._chart.series.setUseOpenGL(True)  # 开启OpenGL
         axisX = self._chart.axisX()  # x轴
-        axisX.setTickCount(7)  # x轴设置7个刻度
+        axisX.setTickCount(1000)  # x轴设置7个刻度
         axisX.setGridLineVisible(False)  # 隐藏从x轴往上的线条
+        axisX.setRange(0, 1000)  # 设置y轴范围
         axisY = self._chart.axisY()
         axisY.setTickCount(7)  # y轴设置7个刻度
-        axisY.setRange(0, 1500)  # 设置y轴范围
-        # 自定义x轴
-        axis_x = QCategoryAxis(
-            self._chart, labelsPosition=QCategoryAxis.AxisLabelsPositionOnValue)
-        axis_x.setTickCount(7)
-        axis_x.setGridLineVisible(False)
-        min_x = axisX.min()
-        max_x = axisX.max()
-        step = (max_x - min_x) / (7 - 1)  # 7个tick
-        for i in range(0, 7):
-            axis_x.append(self.category[i], min_x + i * step)
-        self._chart.setAxisX(axis_x, self._chart.series()[-1])
+        axisY.setRange(0, 5000)  # 设置y轴范围
         # chart的图例
         legend = self._chart.legend()
         # 设置图例由Series来决定样式
@@ -269,6 +250,39 @@ class ChartView(QChartView):
             # 鼠标悬停事件
             marker.hovered.connect(self.handleMarkerHovered)
         self.setChart(self._chart)
+
+    def get_plot_data(self, data):
+        # (?<=...)  如果...出现在字符串前面才做匹配
+        # \d 匹配任何十进制数字，和[0-9]相同（\D与\d相反，不匹配任何非数值型的数字）
+        # + 匹配1次或多次前面出现的正则表达式
+        # \d+匹配1次或者多次数字
+        # \.?这个是匹配小数点的，可能有，也可能没有
+        # \d * 这个是匹配小数点之后的数字的
+        ch_data = re.compile(r'(?<=CH1:)\d+\.?\d*')
+        ch_data = ch_data.findall(data)
+        for ser in self._chart.series():
+            if ch_data:
+                float_data = list(map(float, ch_data))  # 一开始缓冲中有多余的数据
+                # print('接收数据' + str(float_data))
+                for plot_data in float_data:
+                    self.data_save.append(plot_data)
+                    if plot_data >= self.data_max:
+                        self.data_max = plot_data
+                        # print('data_max '+str(self.data_max))
+                    if plot_data <= self.data_min:
+                        self.data_min = plot_data
+                        # print('data_min '+str(self.data_min))
+                self.axisX_data += 1
+                self.axisY_data = self.data_save[-1]  # 前面缓存较多 取最后一个保证实时性
+                # print(self.data_save)     # 第一个 数据 确实不正确
+                print('X is ' + str(self.axisX_data) + ' Y is ' + str(self.axisY_data))
+                ser.append(self.axisX_data, self.axisY_data)
+                if ser.count() > 1500:
+                    ser.removePoints(0, ser.count() - 1500)
+                # axisX = self._chart.axisX()
+                # axisX.setRange(max(0, self.axisX_data - 1000), self.axisX_data)
+            # axisY = self._chart.axisY()
+            # axisY.setRange(self.data_min - 50, self.data_max + 50)
 
 
 if __name__ == "__main__":

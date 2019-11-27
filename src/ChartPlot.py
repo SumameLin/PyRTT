@@ -46,6 +46,12 @@ class ChartPlot(QChart):
 
     def get_term_data(self, data):
         self.data_term = data
+        # (?<=...)  如果...出现在字符串前面才做匹配
+        # \d 匹配任何十进制数字，和[0-9]相同（\D与\d相反，不匹配任何非数值型的数字）
+        # + 匹配1次或多次前面出现的正则表达式
+        # \d+匹配1次或者多次数字
+        # \.?这个是匹配小数点的，可能有，也可能没有
+        # \d * 这个是匹配小数点之后的数字的
         pattern = re.compile(r'(?<=CH1:)\d+\.?\d*')
         float_data = pattern.findall(self.data_term)
         if float_data:
@@ -62,7 +68,7 @@ class ChartPlot(QChart):
             self.axisX_data += 1
             self.axisY_data = self.data_save[-1]  # 前面缓存较多 取最后一个保证实时性
             # print(self.data_save)     # 第一个 数据 确实不正确
-            print('X is ' + str(self.axisX_data) + ' Y is ' + str(self.axisY_data))
+            # print('X is ' + str(self.axisX_data) + ' Y is ' + str(self.axisY_data))
             self.series.append(self.axisX_data, self.axisY_data)
             self.send_labCH1.emit(str(int(self.axisY_data)))
             # self.scroll(8, 0)
