@@ -17,6 +17,7 @@ from src.LineStack import ChartView
 class RttTool(QtWidgets.QMainWindow, Ui_MainWindow):
     send_rtt_data = pyqtSignal(str)
     send_print_data = pyqtSignal(str)
+    send_plot_data = pyqtSignal(str)
 
     def __init__(self, parent=None):
         super(RttTool, self).__init__(parent=parent)
@@ -43,21 +44,23 @@ class RttTool(QtWidgets.QMainWindow, Ui_MainWindow):
         self.term_data = []
 
         self.init()
-        self.chartWindow = ChartPlot()
-        self.chartWindow.legend().hide()  # 隐藏legend
+        chartWindow = ChartPlot()
+        chartWindow.legend().hide()  # 隐藏legend
         # NoAnimation
         # AllAnimations
         # SeriesAnimations 在缩放窗口大小时可以用动画进行美化
-        self.chartWindow.setAnimationOptions(QChart.NoAnimation)
-        self.widget.setChart(self.chartWindow)
+        chartWindow.setAnimationOptions(QChart.NoAnimation)
+        self.widget.setChart(chartWindow)
         self.widget.setRenderHint(QPainter.Antialiasing)  # 抗锯齿
         # self.widget.setRubberBand(QChartView.RectangleRubberBand)  # axisY.setRange 不能固定
-        self.chartWindow.send_labCH1.connect(lambda p: self.labCH1.setText(p))
+        chartWindow.send_labCH1.connect(lambda p: self.labCH1.setText(p))
+        self.send_rtt_data.connect(lambda p: chartWindow.get_term_data(p))
         # 显示LineStack
         chart_view = ChartView()
         baseLayout = QGridLayout()
         baseLayout.addWidget(chart_view)
         self.widget_plot.setLayout(baseLayout)
+        self.send_plot_data.connect(lambda p: chart_view.get_plot_data(p))
         # 信号与槽初始化
 
     def init(self):
@@ -75,7 +78,6 @@ class RttTool(QtWidgets.QMainWindow, Ui_MainWindow):
         # 不显示Log 窗口
         self.actionshowLog.triggered.connect(self.hide_logWindow)
         # 发送RTT数据
-        self.send_rtt_data.connect(lambda p: self.chartWindow.get_term_data(p))
         self.send_print_data.connect(lambda p: self.print_data(p))
 
     # 发送框清除
@@ -156,6 +158,7 @@ class RttTool(QtWidgets.QMainWindow, Ui_MainWindow):
                     # self.print_data(self.term_data)
                     self.send_print_data.emit(self.term_data)
                     self.send_rtt_data.emit(self.term_data)
+                    # self.send_plot_data.emit(self.term_data)  # 太卡了 且不能跟随移动 数据处理应该单独
                 #     sys.stdout.write("".join(map(chr, terminal_bytes)))
                 #     sys.stdout.flush()
                 # time.sleep(0.01)  # S 单位

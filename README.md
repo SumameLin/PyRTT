@@ -263,6 +263,10 @@ SEGGER_RTT_printf("CH1:%d",i++);
 
 2.QChart还不完善，想达到的效果是 QTabWidget 的Plot 的例程的效果
 
+==2019.11.27==
+
+QTabWidget 的Plot 的例程修改了，但显示效果不理想，且暂时没有写多条曲线。
+
 ## 参考
 
 [1.PyLink]( https://pylink.readthedocs.io/en/latest/index.html )
@@ -273,3 +277,6 @@ SEGGER_RTT_printf("CH1:%d",i++);
 
 [4.PyQt5/PyQt](https://github.com/PyQt5/PyQt)
 
+[5.python正则表达式从字符串中提取数字](https://blog.csdn.net/u010412858/article/details/83062200)
+
+[6.Python实用（正则表达式）](https://www.jianshu.com/p/5b7adc5403c5)
