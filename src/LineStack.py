@@ -9,7 +9,7 @@ Created on 2017年12月28日
 @file: charts.line.LineStack
 @description: like http://echarts.baidu.com/demo.html#line-stack
 """
-import re
+
 import sys
 
 from PyQt5.QtChart import QChart, QChartView, QLegend, QLineSeries, QSplineSeries, QValueAxis
@@ -114,9 +114,8 @@ class ChartView(QChartView):
 
         self.axisX_data = 0
         self.axisY_data = 0
-        self.data_max = float("-inf")
-        self.data_min = float("inf")
-        self.data_save = []  # 很蠢的方法，待会优化
+        self.data_max = 100.0
+        self.data_min = 0
 
     def resizeEvent(self, event):
         super(ChartView, self).resizeEvent(event)
@@ -251,38 +250,25 @@ class ChartView(QChartView):
             marker.hovered.connect(self.handleMarkerHovered)
         self.setChart(self._chart)
 
+    def get_plot_data_max(self, data_max):
+        self.data_max = data_max
+
+    def get_plot_data_min(self, data_min):
+        self.data_min = data_min
+
     def get_plot_data(self, data):
-        # (?<=...)  如果...出现在字符串前面才做匹配
-        # \d 匹配任何十进制数字，和[0-9]相同（\D与\d相反，不匹配任何非数值型的数字）
-        # + 匹配1次或多次前面出现的正则表达式
-        # \d+匹配1次或者多次数字
-        # \.?这个是匹配小数点的，可能有，也可能没有
-        # \d * 这个是匹配小数点之后的数字的
-        ch_data = re.compile(r'(?<=CH1:)\d+\.?\d*')
-        ch_data = ch_data.findall(data)
+        self.axisX_data += 1
         for ser in self._chart.series():
-            if ch_data:
-                float_data = list(map(float, ch_data))  # 一开始缓冲中有多余的数据
-                # print('接收数据' + str(float_data))
-                for plot_data in float_data:
-                    self.data_save.append(plot_data)
-                    if plot_data >= self.data_max:
-                        self.data_max = plot_data
-                        # print('data_max '+str(self.data_max))
-                    if plot_data <= self.data_min:
-                        self.data_min = plot_data
-                        # print('data_min '+str(self.data_min))
-                self.axisX_data += 1
-                self.axisY_data = self.data_save[-1]  # 前面缓存较多 取最后一个保证实时性
-                # print(self.data_save)     # 第一个 数据 确实不正确
-                print('X is ' + str(self.axisX_data) + ' Y is ' + str(self.axisY_data))
-                ser.append(self.axisX_data, self.axisY_data)
-                if ser.count() > 1500:
-                    ser.removePoints(0, ser.count() - 1500)
-                # axisX = self._chart.axisX()
-                # axisX.setRange(max(0, self.axisX_data - 1000), self.axisX_data)
-            # axisY = self._chart.axisY()
-            # axisY.setRange(self.data_min - 50, self.data_max + 50)
+            self.axisY_data = data
+            # print('X is ' + str(self.axisX_data) + ' Y is ' + str(self.axisY_data))
+            ser.append(self.axisX_data, self.axisY_data)
+            if ser.count() > 1500:
+                ser.removePoints(0, ser.count() - 1500)
+        # axisX = self._chart.axisX()   # 设置 X 的setRange 速度快了很卡
+        # axisX.setRange(max(0, self.axisX_data - 1000), self.axisX_data)
+        # self.min_x, self.max_x = axisX.min(), axisX.max()
+        # axisY = self._chart.axisY()
+        # axisY.setRange(self.data_min - 50, self.data_max + 50)
 
 
 if __name__ == "__main__":

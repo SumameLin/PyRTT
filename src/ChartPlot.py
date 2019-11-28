@@ -1,7 +1,8 @@
+import random
 import re
 from PyQt5.QtChart import QChart, QSplineSeries, QValueAxis
 from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtGui import QPen
+from PyQt5.QtGui import QPen, QColor
 
 """
 画图会有延时，都缓存在 self.data_save 中,取data_save中最后一个保持实时性
@@ -19,10 +20,17 @@ class ChartPlot(QChart):
         self.data_min = float("inf")
         self.data_save = []
         self.data_term = ''
+        self.show_flag = 1
         # 初始化图像
         self.series = QSplineSeries(self)
         self.series.setName('CH1')  # chart.setAcceptHoverEvents(True)
-        series_pen = QPen(Qt.blue)
+        colour = [random.randrange(0, 255),
+                  random.randrange(0, 255),
+                  random.randrange(0, 255)]
+        series_pen = QPen(QColor(colour[0],
+                                 colour[1],
+                                 colour[2])
+                          )
         series_pen.setWidth(2)  # 线宽
         self.series.setPen(series_pen)
         self.axisX = QValueAxis()  # QCategoryAxis ?
@@ -44,6 +52,14 @@ class ChartPlot(QChart):
         self.series.attachAxis(self.axisY)
         self.series.setUseOpenGL(True)  # 开启OpenGL
 
+    def show_plot(self):
+        if self.show_flag == 0:
+            self.series.setVisible(True)
+            self.show_flag = 1
+        elif self.show_flag == 1:
+            self.series.setVisible(False)
+            self.show_flag = 0
+
     def get_term_data(self, data):
         self.data_term = data
         # (?<=...)  如果...出现在字符串前面才做匹配
@@ -51,7 +67,7 @@ class ChartPlot(QChart):
         # + 匹配1次或多次前面出现的正则表达式
         # \d+匹配1次或者多次数字
         # \.?这个是匹配小数点的，可能有，也可能没有
-        # \d * 这个是匹配小数点之后的数字的
+        # \d* 这个是匹配小数点之后的数字的
         pattern = re.compile(r'(?<=CH1:)\d+\.?\d*')
         float_data = pattern.findall(self.data_term)
         if float_data:
@@ -70,6 +86,7 @@ class ChartPlot(QChart):
             # print(self.data_save)     # 第一个 数据 确实不正确
             # print('X is ' + str(self.axisX_data) + ' Y is ' + str(self.axisY_data))
             self.series.append(self.axisX_data, self.axisY_data)
+            # self.series.setName(str(int(self.axisY_data)))
             self.send_labCH1.emit(str(int(self.axisY_data)))
             # self.scroll(8, 0)
             self.axisX.setRange(max(0, self.axisX_data - 1000), self.axisX_data)

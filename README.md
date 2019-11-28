@@ -199,6 +199,8 @@ D:\Anaconda3\Library\include\qt\QtCore/qglobal.h(45): fatal error C1083: 无法�
 
 环境还是没有配置正确。。。还是直接用C++吧
 
+[Pyside-QCP]( https://github.com/SBGit-2019/Pyside-QCP ),这个有windows下的编译，不过跟PySide2一起编译，感觉环境配置太麻烦了。还不如用C++。
+
 ## PyLink
 
 1.PyLink rtt_read 无法读取SEGGER_RTT_Write的数据，只能读取SEGGER_RTT_printf的数据，不正常啊。
@@ -249,7 +251,12 @@ X is 2 Y is 3012.0
 SEGGER_RTT_printf("CH1:%d",i++);
 ```
 
+不显示绘图数据：
 
+```c
+SEGGER_RTT_printf("Log:Hello\r\n");
+Log: xx \r\n           开头Log： 结尾 \r\n
+```
 
 ## Log
 
@@ -266,6 +273,14 @@ SEGGER_RTT_printf("CH1:%d",i++);
 ==2019.11.27==
 
 QTabWidget 的Plot 的例程修改了，但显示效果不理想，且暂时没有写多条曲线。
+
+==2019.11.28==
+
+放弃QTabWidget 的Plot 的例程修改了，很卡，且不跟随
+
+加入对单独Log的显示，即单独不显示绘图数据（混合显示绘图数据一直刷屏，可以忽律其它打印信息）
+
+写入绘图数据到csv文件待完成 
 
 ## 参考
 

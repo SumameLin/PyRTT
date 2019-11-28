@@ -57,7 +57,7 @@
          <item row="0" column="0">
           <widget class="QTabWidget" name="tabWidget">
            <property name="currentIndex">
-            <number>3</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="Log">
             <attribute name="title">
@@ -109,19 +109,19 @@
             </attribute>
             <layout class="QGridLayout" name="gridLayout_6" columnstretch="0,30,0">
              <property name="leftMargin">
-              <number>1</number>
+              <number>0</number>
              </property>
              <property name="topMargin">
-              <number>1</number>
+              <number>0</number>
              </property>
              <property name="rightMargin">
-              <number>1</number>
+              <number>0</number>
              </property>
              <property name="bottomMargin">
-              <number>1</number>
+              <number>0</number>
              </property>
              <property name="spacing">
-              <number>1</number>
+              <number>0</number>
              </property>
              <item row="0" column="0">
               <spacer name="horizontalSpacer_3">
@@ -138,30 +138,16 @@
              </item>
              <item row="0" column="1" rowspan="2">
               <layout class="QHBoxLayout" name="horizontalLayout" stretch="12,1">
+               <property name="spacing">
+                <number>0</number>
+               </property>
                <item>
-                <layout class="QVBoxLayout" name="verticalLayout_2" stretch="15,1">
+                <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0">
                  <property name="spacing">
-                  <number>1</number>
+                  <number>0</number>
                  </property>
                  <item>
                   <widget class="QChartView" name="widget" native="true"/>
-                 </item>
-                 <item>
-                  <widget class="QWidget" name="widget_2" native="true">
-                   <widget class="QSlider" name="horizontalSlider">
-                    <property name="geometry">
-                     <rect>
-                      <x>10</x>
-                      <y>10</y>
-                      <width>951</width>
-                      <height>22</height>
-                     </rect>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </widget>
                  </item>
                 </layout>
                </item>
@@ -179,38 +165,15 @@
                   <property name="text">
                    <string>CH1</string>
                   </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
                  </widget>
                  <widget class="QLabel" name="labCH1">
                   <property name="geometry">
                    <rect>
                     <x>10</x>
                     <y>40</y>
-                    <width>61</width>
-                    <height>21</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>0</string>
-                  </property>
-                 </widget>
-                 <widget class="QCheckBox" name="cbxCH2">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>80</y>
-                    <width>51</width>
-                    <height>21</height>
-                   </rect>
-                  </property>
-                  <property name="text">
-                   <string>CH2</string>
-                  </property>
-                 </widget>
-                 <widget class="QLabel" name="labCH2">
-                  <property name="geometry">
-                   <rect>
-                    <x>10</x>
-                    <y>110</y>
                     <width>61</width>
                     <height>21</height>
                    </rect>
@@ -427,6 +390,7 @@
     </property>
     <addaction name="actionqingchu"/>
     <addaction name="actionshowLog"/>
+    <addaction name="actionxieru"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -467,6 +431,11 @@
   <action name="actionshowLog">
    <property name="text">
     <string>显示Log</string>
+   </property>
+  </action>
+  <action name="actionxieru">
+   <property name="text">
+    <string>写入数据</string>
    </property>
   </action>
  </widget>
